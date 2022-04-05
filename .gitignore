@@ -1,0 +1,7 @@
+.vscode
+bin
+build
+lib
+test
+main.cpp
+run.sh
