@@ -18,8 +18,8 @@ public:
         : std::runtime_error(msg)
     {}
 
-    BaseException(std::string const &name, std::string const &msg)
-        : std::runtime_error(name + ": " + msg)
+    BaseException(std::string const &name, const std::string &func, const std::string &msg)
+        : std::runtime_error(name + ": in \"" + func + "\"\n" + msg)
     {}
 
     ~BaseException() = default;

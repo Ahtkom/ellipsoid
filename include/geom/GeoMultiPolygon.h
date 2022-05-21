@@ -3,38 +3,41 @@
 
 #include <geom/GeoGeometry.h>
 #include <geom/GeoPolygon.h>
-#include <vector>
+
 #include <memory>
+#include <vector>
 
 namespace ep {
 namespace geom {
 
-class GeoMultiPolygon : public GeoGeometry
-{
-    friend class GeoFactory;
+class GeoMultiPolygon : public GeoGeometry {
+  friend class GeoFactory;
 
 public:
-    using Ptr = std::unique_ptr<GeoMultiPolygon>;
+  using Ptr = std::unique_ptr<GeoMultiPolygon>;
 
-    ~GeoMultiPolygon() override = default;
+  ~GeoMultiPolygon() override = default;
 
-    std::string getGeometryType() const override;
+  std::string getGeometryType() const override;
 
-    std::size_t getNumPolygon() const;
+  std::size_t getNumPolygon() const;
 
-    GeoPolygon *getPolygonN(std::size_t index);
+  GeoPolygon *getPolygonN(std::size_t index);
 
-    const GeoPolygon *getPolygonN(std::size_t index) const;
+  const GeoPolygon *getPolygonN(std::size_t index) const;
+
+#ifdef EP_OPENGL
+  void draw() const override;
+#endif
 
 protected:
-    GeoMultiPolygon(std::vector<GeoPolygon::Ptr> &&ps);
+  GeoMultiPolygon(std::vector<std::unique_ptr<GeoPolygon>> &&ps);
 
 private:
-    std::vector<GeoPolygon::Ptr> ps_;
+  std::vector<std::unique_ptr<GeoPolygon>> ps_;
 };
-
 
 } // namespace geom
 } // namespace ep
 
-#endif
+#endif // ELLIPSOID_GEOM_MULTIPOLYGON_H_

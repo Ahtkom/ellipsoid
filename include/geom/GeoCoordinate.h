@@ -2,31 +2,35 @@
 #define ELLIPSOID_GEOM_GEOCOORDINATE_H_
 
 #include <util/Macro.h>
+
 #include <memory>
 
 namespace ep {
 namespace geom {
 
-class GeoCoordinate
-{
+class GeoCoordinate {
 public:
-    using Ptr = std::unique_ptr<GeoCoordinate>;
+  GeoCoordinate(double lon = 0.0, double lat = 0.0);
 
-    GeoCoordinate(double lon = 0.0, double lat = 0.0);
+  ~GeoCoordinate() = default;
 
-    ~GeoCoordinate() = default;
+  double getLon() const;
 
-    double getLon() const;
-    
-    double getLat() const;
+  double getLat() const;
 
-    TO_STRING_METHOD_WITH_OSTREAM(GeoCoordinate)
+  TO_STRING_METHOD_WITH_OSTREAM(GeoCoordinate)
+
+#ifdef EP_OPENGL
+  void draw() const;
+#endif
 
 private:
-    double lon_, lat_;
+  double lon_;
+
+  double lat_;
 };
 
 } // namespace geom
-} // namespace ep   
+} // namespace ep
 
-#endif
+#endif // ELLIPSOID_GEOM_GEOCOORDINATE_H_

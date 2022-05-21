@@ -9,12 +9,12 @@ namespace util {
 class IllegalArgumentException : public BaseException
 {
 public:
-    IllegalArgumentException()
-        : BaseException("IllegalArgumentException", "")
-    {}
+    // IllegalArgumentException()
+    //     : BaseException("IllegalArgumentException", "")
+    // {}
 
-    IllegalArgumentException(const std::string &msg)
-        : BaseException("IllegalArgumentException", msg)
+    IllegalArgumentException(const std::string &func, const std::string &msg)
+        : BaseException("IllegalArgumentException", func, msg)
     {}
 
     ~IllegalArgumentException() noexcept override {}

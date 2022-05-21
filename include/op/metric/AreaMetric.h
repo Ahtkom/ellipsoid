@@ -3,6 +3,7 @@
 
 #include <geom/GeoGeometry.h>
 #include <geom/GeoEarth.h>
+#include <op/metric/BaseMetric.h>
 
 namespace ep {
 namespace geom {
@@ -15,16 +16,12 @@ class GeoMultiPolygon;
 namespace ep {
 namespace op {
 
-class AreaMetric
+class AreaMetric : public BaseMetric
 {
 public:
     AreaMetric(const geom::GeoEarth &earth);
 
     ~AreaMetric() = default;
-
-    geom::GeoEarth getGeoEarth() const;
-
-    void setGeoEarth(const geom::GeoEarth &earth);
 
     double evaluateArea(const geom::GeoGeometry *geometry);
 
@@ -34,9 +31,6 @@ private:
     double areaOfPolygon(const geom::GeoPolygon *p);
 
     double areaOfMultiPolygon(const geom::GeoMultiPolygon *mp);
-
-private:
-    geom::GeoEarth earth_;
 };
 
 } // namespace op

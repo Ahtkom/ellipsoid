@@ -3,46 +3,50 @@
 
 #include <geom/GeoGeometry.h>
 #include <geom/GeoLinearRing.h>
+
 #include <memory>
 #include <vector>
 
 namespace ep {
 namespace geom {
 
-class GeoPolygon : public GeoGeometry
-{
-    friend class GeoFactory;
+class GeoPolygon : public GeoGeometry {
+  friend class GeoFactory;
 
 public:
-    using Ptr = std::unique_ptr<GeoPolygon>;
+  using Ptr = std::unique_ptr<GeoPolygon>;
 
-    ~GeoPolygon() override = default;
+  ~GeoPolygon() override = default;
 
-    std::string getGeometryType() const override;
+  std::string getGeometryType() const override;
 
-    std::size_t getNumInteriorRing() const;
+  std::size_t getNumInteriorRing() const;
 
-    GeoLinearRing *getExteriorRing();
+  GeoLinearRing *getExteriorRing();
 
-    const GeoLinearRing *getExteriorRing() const;
+  const GeoLinearRing *getExteriorRing() const;
 
-    GeoLinearRing *getInteriorRingN(std::size_t index);
+  GeoLinearRing *getInteriorRingN(std::size_t index);
 
-    const GeoLinearRing *getInteriorRingN(std::size_t index) const;
+  const GeoLinearRing *getInteriorRingN(std::size_t index) const;
+
+#ifdef EP_OPENGL
+  void draw() const override;
+#endif
 
 protected:
-    GeoPolygon(GeoLinearRing::Ptr &&shell);
+  GeoPolygon(std::unique_ptr<GeoLinearRing> &&shell);
 
-    GeoPolygon(GeoLinearRing::Ptr &&shell, std::vector<GeoLinearRing::Ptr> &&holes);
+  GeoPolygon(std::unique_ptr<GeoLinearRing> &&shell,
+             std::vector<std::unique_ptr<GeoLinearRing>> &&holes);
 
 private:
-    GeoLinearRing::Ptr shell_;
+  std::unique_ptr<GeoLinearRing> shell_;
 
-    std::vector<GeoLinearRing::Ptr> holes_;
+  std::vector<std::unique_ptr<GeoLinearRing>> holes_;
 };
-
 
 } // namespace geom
 } // namespace ep
 
-#endif
+#endif // ELLIPSOID_GEOM_GEOPOLYGON_H_

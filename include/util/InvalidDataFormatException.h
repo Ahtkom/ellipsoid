@@ -9,12 +9,12 @@ namespace util {
 class InvalidDataFormatException : public BaseException
 {
 public:
-    InvalidDataFormatException()
-        : BaseException("InvalidDataFormatException", "")
-    {}
+    // InvalidDataFormatException()
+    //     : BaseException("InvalidDataFormatException", "")
+    // {}
 
-    InvalidDataFormatException(const std::string &msg)
-        : BaseException("InvalidDataFormatException", msg)
+    InvalidDataFormatException(const std::string &func, const std::string &msg)
+        : BaseException("InvalidDataFormatException", func, msg)
     {}
 
     ~InvalidDataFormatException() noexcept override {}

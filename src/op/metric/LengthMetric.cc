@@ -13,7 +13,8 @@ namespace ep {
 namespace op {
 
 LengthMetric::LengthMetric(const geom::GeoEarth &earth)
-    : dm_(earth)
+    : BaseMetric(earth)
+    , dm(new DistanceMetric(earth))
 {
 }
 
@@ -21,12 +22,15 @@ double
 LengthMetric::evaluateLength(const geom::GeoGeometry *geometry)
 {
     if (geometry->getGeometryType() == "LINESEGMENT") {
-        return lengthOfLineSegment(static_cast<const geom::GeoLineSegment *>(geometry));
+        return lengthOfLineSegment(
+            static_cast<const geom::GeoLineSegment *>(geometry));
     } else if (geometry->getGeometryType() == "LINESTRING" ||
             geometry->getGeometryType() == "LINEARRING") {
-        return lengthOfLineString(static_cast<const geom::GeoLineString *>(geometry));
+        return lengthOfLineString(
+            static_cast<const geom::GeoLineString *>(geometry));
     } else if (geometry->getGeometryType() == "MULTILINESTRING") {
-        return lengthOfMultiLineString(static_cast<const geom::GeoMultiLineString *>(geometry));
+        return lengthOfMultiLineString(
+            static_cast<const geom::GeoMultiLineString *>(geometry));
     }
     return -1.0;
 }
@@ -34,7 +38,7 @@ LengthMetric::evaluateLength(const geom::GeoGeometry *geometry)
 double
 LengthMetric::lengthOfLineSegment(const geom::GeoLineSegment *seg)
 {
-    return dm_.evaluateDistance(seg->getFromPoint(), seg->getToPoint());
+    return dm->distanceBetweenPoints(seg->getFromPoint(), seg->getToPoint());
 }
 
 double
@@ -42,7 +46,8 @@ LengthMetric::lengthOfLineString(const geom::GeoLineString *ls)
 {
     double length = 0, n = ls->getCoordinates()->getNumCoordinate();
     for (std::size_t i = 0; i != n - 1; ++i) {
-        length += dm_.distanceCoordinates(ls->getCoordinateN(i), ls->getCoordinateN(i + 1));
+        length += dm->distanceBetweenCoordinates(
+            ls->getCoordinateN(i), ls->getCoordinateN(i + 1));
     }
     return length;
 }

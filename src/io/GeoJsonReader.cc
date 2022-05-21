@@ -28,15 +28,21 @@ GeoJsonReader::read(const nlohmann::json &geojson)
     if (geojson.contains("type")) {
         if (geojson["type"] == "Feature") {
             return readGeometryCoordinates(geojson["geometry"]);
-        } else if (geojson.contains("coordinates")) {
-            return readGeometryCoordinates(geojson);
         } else if (geojson["type"] == "FeatureCollection") {
-            throw io::ParseException("FeatureCollection not supported!");
-        }
+            throw ParseException(__PRETTY_FUNCTION__,
+                ": FeatureCollection not supported!");
+        } else {
+            if (geojson.contains("coordinates")) {
+                return readGeometryCoordinates(geojson);
+            } else {
+                    throw ParseException(__PRETTY_FUNCTION__,
+        "Invalid GeoJson data <no type specifier>: " + geojson.dump());
+            }
+        }        
     }
 
-    throw io::ParseException(
-        "Invalid GeoJson data: no type specifier\n" + geojson.dump());
+    throw ParseException(__PRETTY_FUNCTION__,
+        "Invalid GeoJson data <no type specifier>: " + geojson.dump());
 }
 
 geom::GeoGeometry::Ptr
@@ -61,13 +67,14 @@ GeoJsonReader::readGeometryCoordinates(const nlohmann::json &geojson)
         } else if (geometryType == "MultiPolygon") {
             return readMultiPolygon(coordinates);
         } else {
-            throw io::ParseException(
+            throw ParseException(__PRETTY_FUNCTION__,
                 "Geometry type " + geometryType + " not supported!");
         }
     }
 
-    throw io::ParseException(
-        "Invalid GeoJson data: no type or coordinates specifier\n" + geojson.dump());
+    throw ParseException(__PRETTY_FUNCTION__,
+        "Invalid GeoJson data <no type or coordinates specifier>: " +
+        geojson.dump());
 }
 
 geom::GeoCoordinate
@@ -77,7 +84,8 @@ GeoJsonReader::readCoordinate(const nlohmann::json &geojson)
         return {geojson[0], geojson[1]};
     }
 
-    throw io::ParseException("Invalid GeoJson data for coordinate!");
+    throw ParseException(__PRETTY_FUNCTION__,
+        "Invalid GeoJson data for coordinate: " + geojson.dump());
 }
 
 geom::GeoCoordinateSequence::Ptr
@@ -92,34 +100,35 @@ GeoJsonReader::readCoordinateSequence(const nlohmann::json &geojson)
             coords.push_back(readCoordinate(geojson[i]));
         }
 
-        return gf.createGeoCoordinateSequence(std::move(coords));
+        return gf.createCoordinateSequence(std::move(coords));
     }
     
-    throw io::ParseException("Invalid GeoJson data for coordinate sequence!");
+    throw ParseException(__PRETTY_FUNCTION__,
+        "Invalid GeoJson data for coordinate sequence: " + geojson.dump());
 }
 
 geom::GeoPoint::Ptr
 GeoJsonReader::readPoint(const nlohmann::json &geojson)
 {
-    return gf.createGeoPoint(readCoordinate(geojson));
+    return gf.createPoint(readCoordinate(geojson));
 }
     
 geom::GeoLineSegment::Ptr
 GeoJsonReader::readLineSegment(const nlohmann::json &geojson)
 {
-    return gf.createGeoLineSegment(readCoordinateSequence(geojson));
+    return gf.createLineSegment(readCoordinateSequence(geojson));
 }
     
 geom::GeoLineString::Ptr
 GeoJsonReader::readLineString(const nlohmann::json &geojson)
 {
-    return gf.createGeoLineString(readCoordinateSequence(geojson));
+    return gf.createLineString(readCoordinateSequence(geojson));
 }
     
 geom::GeoLinearRing::Ptr
 GeoJsonReader::readLinearRing(const nlohmann::json &geojson)
 {
-    return gf.createGeoLinearRing(readCoordinateSequence(geojson));
+    return gf.createLinearRing(readCoordinateSequence(geojson));
 }
 
 geom::GeoPolygon::Ptr
@@ -134,11 +143,11 @@ GeoJsonReader::readPolygon(const nlohmann::json &geojson)
             rings.push_back(readLinearRing(geojson[i]));
         }
 
-        return gf.createGeoPolygon(std::move(rings));
+        return gf.createPolygon(std::move(rings));
     }
 
-    throw io::ParseException(
-        "Invalid GeoJson data for Polygon\n" + geojson.dump());
+    throw ParseException(__PRETTY_FUNCTION__,
+        "Invalid GeoJson data for Polygon: " + geojson.dump());
 }
     
 geom::GeoMultiLineString::Ptr
@@ -153,11 +162,11 @@ GeoJsonReader::readMultiLineString(const nlohmann::json &geojson)
             lines.push_back(readLineString(geojson[i]));
         }
 
-        return gf.createGeoMultiLineString(std::move(lines));
+        return gf.createMultiLineString(std::move(lines));
     }
 
-    throw io::ParseException(
-        "Invalid GeoJson data for MultiLineString\n" + geojson.dump());
+    throw ParseException(__PRETTY_FUNCTION__,
+        "Invalid GeoJson data for MultiLineString: " + geojson.dump());
 }
 
 geom::GeoMultiPolygon::Ptr
@@ -172,11 +181,11 @@ GeoJsonReader::readMultiPolygon(const nlohmann::json &geojson)
             ps.push_back(readPolygon(geojson[i]));
         }
 
-        return gf.createGeoMultiPolygon(std::move(ps));
+        return gf.createMultiPolygon(std::move(ps));
     }
 
-    throw io::ParseException(
-        "Invalid GeoJson data for MultiPolygon\n" + geojson.dump());
+    throw ParseException(__PRETTY_FUNCTION__,
+        "Invalid GeoJson data for MultiPolygon: " + geojson.dump());
 }
 
 

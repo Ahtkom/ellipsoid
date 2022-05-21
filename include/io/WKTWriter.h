@@ -2,6 +2,8 @@
 #define ELLIPSOID_IO_WKTWRITER_H_
 
 #include <geom/GeoGeometry.h>
+
+#include <memory>
 #include <string>
 
 namespace ep {
@@ -15,44 +17,43 @@ class GeoLinearRing;
 class GeoPolygon;
 class GeoMultiLineString;
 class GeoMultiPolygon;
-}
-}
+} // namespace geom
+} // namespace ep
 
 namespace ep {
 namespace io {
 
-class WKTWriter
-{
+class WKTWriter {
 public:
-    WKTWriter() = default;
+  static std::unique_ptr<WKTWriter> getWriter();
+  
+  WKTWriter() = default;
 
-    ~WKTWriter() = default;
+  ~WKTWriter() = default;
 
-    std::string write(const geom::GeoGeometry *geometry);
+  std::string write(const geom::GeoGeometry *geometry);
 
 private:
-    std::string writePoint(const geom::GeoPoint *pt);
+  std::string writePoint(const geom::GeoPoint *pt);
 
-    std::string writeLineSegment(const geom::GeoLineSegment *seg);
+  std::string writeLineSegment(const geom::GeoLineSegment *seg);
 
-    std::string writeLineString(const geom::GeoLineString *ls);
+  std::string writeLineString(const geom::GeoLineString *ls);
 
-    std::string writeLinearRing(const geom::GeoLinearRing *lr);
+  std::string writeLinearRing(const geom::GeoLinearRing *lr);
 
-    std::string writePolygon(const geom::GeoPolygon *p);
+  std::string writePolygon(const geom::GeoPolygon *p);
 
-    std::string writeMultiLineString(const geom::GeoMultiLineString *mls);
-    
-    std::string writeMultiPolygon(const geom::GeoMultiPolygon *mp);
+  std::string writeMultiLineString(const geom::GeoMultiLineString *mls);
 
-    std::string writeCoordinate(const geom::GeoCoordinate *c);
+  std::string writeMultiPolygon(const geom::GeoMultiPolygon *mp);
 
-    std::string writeCoordinateSequence(const geom::GeoCoordinateSequence *cseq);
+  std::string writeCoordinate(const geom::GeoCoordinate *c);
+
+  std::string writeCoordinateSequence(const geom::GeoCoordinateSequence *cseq);
 };
-    
 
 } // namespace io
 } // namespace ep
 
-
-#endif
+#endif // ELLIPSOID_IO_WKTWRITER_H_

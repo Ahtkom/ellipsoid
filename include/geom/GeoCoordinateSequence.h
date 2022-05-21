@@ -2,37 +2,40 @@
 #define ELLIPSOID_GEOM_GEOCOORDINATESEQUENCE_H_
 
 #include <geom/GeoCoordinate.h>
-#include <vector>
+
 #include <memory>
+#include <vector>
 
 namespace ep {
 namespace geom {
 
-class GeoCoordinateSequence
-{
-    friend class GeoFactory;
+class GeoCoordinateSequence {
+  friend class GeoFactory;
 
 public:
-    using Ptr = std::unique_ptr<GeoCoordinateSequence>;
+  using Ptr = std::unique_ptr<GeoCoordinateSequence>;
 
-    ~GeoCoordinateSequence() = default;
+  GeoCoordinateSequence(std::vector<GeoCoordinate> &&coords);
 
-    std::size_t getNumCoordinate() const;
+  ~GeoCoordinateSequence() = default;
 
-    TO_STRING_METHOD_WITH_OSTREAM(GeoCoordinateSequence)
+  TO_STRING_METHOD_WITH_OSTREAM(GeoCoordinateSequence)
 
-    GeoCoordinate *getCoordinateN(std::size_t index);
+  std::size_t getNumCoordinate() const;
 
-    const GeoCoordinate *getCoordinateN(std::size_t index) const;
+  GeoCoordinate *getCoordinateN(std::size_t index);
 
-protected:
-    GeoCoordinateSequence(std::vector<GeoCoordinate::Ptr> &&coords);
+  const GeoCoordinate *getCoordinateN(std::size_t index) const;
+
+#ifdef EP_OPENGL
+  void draw() const;
+#endif
 
 private:
-    std::vector<GeoCoordinate::Ptr> coords_;
+  std::vector<GeoCoordinate> coords_;
 };
 
 } // namespace geom
-} // namespace ep   
+} // namespace ep
 
-#endif
+#endif // ELLIPSOID_GEOM_GEOCOORDINATESEQUENCE_H_

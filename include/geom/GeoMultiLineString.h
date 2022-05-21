@@ -3,39 +3,41 @@
 
 #include <geom/GeoGeometry.h>
 #include <geom/GeoLineString.h>
-#include <vector>
+
 #include <memory>
+#include <vector>
 
 namespace ep {
 namespace geom {
 
-class GeoMultiLineString : public GeoGeometry
-{
-    friend class GeoFactory;
+class GeoMultiLineString : public GeoGeometry {
+  friend class GeoFactory;
 
 public:
-    using Ptr = std::unique_ptr<GeoMultiLineString>;
-    
-    ~GeoMultiLineString() override = default;
+  using Ptr = std::unique_ptr<GeoMultiLineString>;
 
-    std::string getGeometryType() const override;
+  ~GeoMultiLineString() override = default;
 
-    std::size_t getNumLineString() const;
+  std::string getGeometryType() const override;
 
-    GeoLineString *getLineStringN(std::size_t index);
+  std::size_t getNumLineString() const;
 
-    const GeoLineString *getLineStringN(std::size_t index) const;
+  GeoLineString *getLineStringN(std::size_t index);
+
+  const GeoLineString *getLineStringN(std::size_t index) const;
+
+#ifdef EP_OPENGL
+  void draw() const override;
+#endif
 
 protected:
-    GeoMultiLineString(std::vector<GeoLineString::Ptr> &&lines);
+  GeoMultiLineString(std::vector<GeoLineString::Ptr> &&lines);
 
 private:
-    std::vector<GeoLineString::Ptr> lines_;
+  std::vector<GeoLineString::Ptr> lines_;
 };
-
-
 
 } // namespace geom
 } // namespace ep
 
-#endif
+#endif // ELLIPSOID_GEOM_MULTILINESTRING_H_

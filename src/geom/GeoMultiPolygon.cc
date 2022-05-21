@@ -4,30 +4,27 @@ namespace ep {
 namespace geom {
 
 GeoMultiPolygon::GeoMultiPolygon(std::vector<GeoPolygon::Ptr> &&ps)
-    : ps_(std::move(ps))
-{
+    : ps_(std::move(ps)) {}
+
+std::string GeoMultiPolygon::getGeometryType() const { return "MULTIPOLYGON"; }
+
+std::size_t GeoMultiPolygon::getNumPolygon() const { return ps_.size(); }
+
+GeoPolygon *GeoMultiPolygon::getPolygonN(std::size_t index) {
+  return ps_[index].get();
 }
 
-std::string GeoMultiPolygon::getGeometryType() const
-{
-    return "MULTIPOLYGON";
+const GeoPolygon *GeoMultiPolygon::getPolygonN(std::size_t index) const {
+  return ps_[index].get();
 }
 
-std::size_t GeoMultiPolygon::getNumPolygon() const
-{
-    return ps_.size();
+#ifdef EP_OPENGL
+void GeoMultiPolygon::draw() const {
+  for (std::size_t i = 0; i != getNumPolygon(); ++i) {
+    ps_[i]->draw();
+  }
 }
-
-GeoPolygon *GeoMultiPolygon::getPolygonN(std::size_t index)
-{
-    return ps_[index].get();
-}
-
-const GeoPolygon *GeoMultiPolygon::getPolygonN(std::size_t index) const
-{
-    return ps_[index].get();
-}
-
+#endif
 
 } // namespace geom
 } // namespace ep

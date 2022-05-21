@@ -2,23 +2,28 @@
 #define ELLIPSOID_OP_METRIC_BASEMETRIC_H_
 
 #include <geom/GeoEarth.h>
-#include <op/GeoEarthLoader.h>
 
 namespace ep {
 namespace op {
 
-class BaseMetric : public GeoEarthLoader
-{
+/**
+ * @brief Base class for metric classes, only used for inheritance.
+ */
+class BaseMetric {
 public:
-    BaseMetric(const geom::GeoEarth &earth)
-        : GeoEarthLoader(earth)
-    {}
-    
-    ~BaseMetric() override = default;
-};
+  BaseMetric(const geom::GeoEarth &earth) : earth_(earth) {}
 
+  virtual ~BaseMetric() = default;
+
+  geom::GeoEarth getGeoEarth() const { return earth_; }
+
+  virtual void setGeoEarth(const geom::GeoEarth &earth) { earth_ = earth; }
+
+private:
+  geom::GeoEarth earth_;
+};
 
 } // namespace op
 } // namespace ep
 
-#endif
+#endif // ELLIPSOID_OP_METRIC_BASEMETRIC_H_
