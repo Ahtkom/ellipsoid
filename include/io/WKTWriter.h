@@ -1,10 +1,12 @@
 #ifndef ELLIPSOID_IO_WKTWRITER_H_
 #define ELLIPSOID_IO_WKTWRITER_H_
 
-#include <geom/GeoGeometry.h>
+#include "geom/GeoGeometry.h"
 
+#include <cstddef>
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace ep {
 namespace geom {
@@ -23,34 +25,38 @@ class GeoMultiPolygon;
 namespace ep {
 namespace io {
 
-class WKTWriter {
+class WKTWriter
+{
 public:
-  static std::unique_ptr<WKTWriter> getWriter();
-  
-  WKTWriter() = default;
+  WKTWriter(unsigned precision = 6);
 
-  ~WKTWriter() = default;
+  unsigned getPrecision() const;
+  void     setPrecision(unsigned precision);
 
-  std::string write(const geom::GeoGeometry *geometry);
+  std::vector<char> write(const geom::GeoGeometry *geometry);
 
 private:
-  std::string writePoint(const geom::GeoPoint *pt);
+  std::vector<char> writePoint(const geom::GeoPoint *pt);
 
-  std::string writeLineSegment(const geom::GeoLineSegment *seg);
+  std::vector<char> writeLineSegment(const geom::GeoLineSegment *seg);
 
-  std::string writeLineString(const geom::GeoLineString *ls);
+  std::vector<char> writeLineString(const geom::GeoLineString *ls);
 
-  std::string writeLinearRing(const geom::GeoLinearRing *lr);
+  std::vector<char> writeLinearRing(const geom::GeoLinearRing *lr);
 
-  std::string writePolygon(const geom::GeoPolygon *p);
+  std::vector<char> writePolygon(const geom::GeoPolygon *p);
 
-  std::string writeMultiLineString(const geom::GeoMultiLineString *mls);
+  std::vector<char> writeMultiLineString(const geom::GeoMultiLineString *mls);
 
-  std::string writeMultiPolygon(const geom::GeoMultiPolygon *mp);
+  std::vector<char> writeMultiPolygon(const geom::GeoMultiPolygon *mp);
 
-  std::string writeCoordinate(const geom::GeoCoordinate *c);
+  char *writeCoordinateAt(char *pos, const geom::GeoCoordinate *c);
 
-  std::string writeCoordinateSequence(const geom::GeoCoordinateSequence *cseq);
+  char *writeCoordinateSequenceAt(
+      char *pos, const geom::GeoCoordinateSequence *cseq);
+
+private:
+  unsigned precision_;
 };
 
 } // namespace io

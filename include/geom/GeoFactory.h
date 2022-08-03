@@ -1,7 +1,8 @@
 #ifndef ELLIPSOID_GEOM_GEOFACTORY_H_
 #define ELLIPSOID_GEOM_GEOFACTORY_H_
 
-#include <geom/GeoGeometry.h>
+#include "geom/GeoGeometry.h"
+#include "geom/GeoReferenceSystem.h"
 
 #include <memory>
 #include <vector>
@@ -26,52 +27,63 @@ namespace geom {
 /**
  * @brief Factory class used to create instances of geometry objects.
  */
-class GeoFactory {
+class GeoFactory
+{
 public:
-  GeoFactory() = default;
+  static GeoCoordinate createCoordinate(double lon, double lat,
+      GeoReferenceSystem ref = GeoReferenceSystem::undefined);
 
-  ~GeoFactory() = default;
+  static std::unique_ptr<GeoCoordinateSequence> createCoordinateSequence(
+      std::vector<GeoCoordinate> &&coords,
+      GeoReferenceSystem           ref = GeoReferenceSystem::undefined);
 
-  GeoCoordinate createCoordinate(double lon, double lat);
+  static std::unique_ptr<GeoPoint> createPoint(GeoCoordinate &&coord,
+      GeoReferenceSystem ref = GeoReferenceSystem::undefined);
 
-  std::unique_ptr<GeoCoordinateSequence>
-  createCoordinateSequence(std::vector<GeoCoordinate> &&coords);
+  static std::unique_ptr<GeoLineSegment> createLineSegment(GeoCoordinate &&from,
+      GeoCoordinate                                                      &&to,
+      GeoReferenceSystem ref = GeoReferenceSystem::undefined);
 
-  std::unique_ptr<GeoPoint> createPoint(GeoCoordinate &&coord);
+  static std::unique_ptr<GeoLineSegment> createLineSegment(
+      std::vector<GeoCoordinate> &&coords,
+      GeoReferenceSystem           ref = GeoReferenceSystem::undefined);
 
-  std::unique_ptr<GeoLineSegment> createLineSegment(GeoCoordinate &&from,
-                                                    GeoCoordinate &&to);
+  static std::unique_ptr<GeoLineSegment> createLineSegment(
+      std::unique_ptr<GeoCoordinateSequence> &&cseq,
+      GeoReferenceSystem ref = GeoReferenceSystem::undefined);
 
-  std::unique_ptr<GeoLineSegment>
-  createLineSegment(std::vector<GeoCoordinate> &&coords);
+  static std::unique_ptr<GeoLineString> createLineString(
+      std::unique_ptr<GeoCoordinateSequence> &&cseq,
+      GeoReferenceSystem ref = GeoReferenceSystem::undefined);
 
-  std::unique_ptr<GeoLineSegment>
-  createLineSegment(std::unique_ptr<GeoCoordinateSequence> &&cseq);
+  static std::unique_ptr<GeoLinearRing> createLinearRing(
+      std::unique_ptr<GeoCoordinateSequence> &&cseq,
+      GeoReferenceSystem ref = GeoReferenceSystem::undefined);
 
-  std::unique_ptr<GeoLineString>
-  createLineString(std::unique_ptr<GeoCoordinateSequence> &&cseq);
+  static std::unique_ptr<GeoLinearRing> createLinearRing(
+      std::unique_ptr<GeoLineString> &&ls,
+      GeoReferenceSystem               ref = GeoReferenceSystem::undefined);
 
-  std::unique_ptr<GeoLinearRing>
-  createLinearRing(std::unique_ptr<GeoCoordinateSequence> &&cseq);
+  static std::unique_ptr<GeoPolygon> createPolygon(
+      std::unique_ptr<GeoLinearRing> &&shell,
+      GeoReferenceSystem               ref = GeoReferenceSystem::undefined);
 
-  std::unique_ptr<GeoLinearRing>
-  createLinearRing(std::unique_ptr<GeoLineString> &&ls);
+  static std::unique_ptr<GeoPolygon> createPolygon(
+      std::unique_ptr<GeoLinearRing>              &&shell,
+      std::vector<std::unique_ptr<GeoLinearRing>> &&holes,
+      GeoReferenceSystem ref = GeoReferenceSystem::undefined);
 
-  std::unique_ptr<GeoPolygon>
-  createPolygon(std::unique_ptr<GeoLinearRing> &&shell);
+  static std::unique_ptr<GeoPolygon> createPolygon(
+      std::vector<std::unique_ptr<GeoLinearRing>> &&rings,
+      GeoReferenceSystem ref = GeoReferenceSystem::undefined);
 
-  std::unique_ptr<GeoPolygon>
-  createPolygon(std::unique_ptr<GeoLinearRing> &&shell,
-                std::vector<std::unique_ptr<GeoLinearRing>> &&holes);
+  static std::unique_ptr<GeoMultiLineString> createMultiLineString(
+      std::vector<std::unique_ptr<GeoLineString>> &&lines,
+      GeoReferenceSystem ref = GeoReferenceSystem::undefined);
 
-  std::unique_ptr<GeoPolygon>
-  createPolygon(std::vector<std::unique_ptr<GeoLinearRing>> &&rings);
-
-  std::unique_ptr<GeoMultiLineString>
-  createMultiLineString(std::vector<std::unique_ptr<GeoLineString>> &&lines);
-
-  std::unique_ptr<GeoMultiPolygon>
-  createMultiPolygon(std::vector<std::unique_ptr<GeoPolygon>> &&ps);
+  static std::unique_ptr<GeoMultiPolygon> createMultiPolygon(
+      std::vector<std::unique_ptr<GeoPolygon>> &&ps,
+      GeoReferenceSystem ref = GeoReferenceSystem::undefined);
 };
 
 } // namespace geom

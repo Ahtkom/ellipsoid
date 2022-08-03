@@ -23,9 +23,9 @@ public:
 
   std::size_t getNumCoordinate() const;
 
-  GeoCoordinate *getCoordinateN(std::size_t index);
+  GeoCoordinate *getCoordinate(std::size_t index);
 
-  const GeoCoordinate *getCoordinateN(std::size_t index) const;
+  const GeoCoordinate *getCoordinate(std::size_t index) const;
 
 #ifdef EP_OPENGL
   void draw() const;

@@ -1,15 +1,19 @@
 #ifndef ELLIPSOID_GEOM_GEOLINESTRING_H_
 #define ELLIPSOID_GEOM_GEOLINESTRING_H_
 
-#include <geom/GeoCoordinateSequence.h>
-#include <geom/GeoGeometry.h>
+#include "geom/GeoCoordinateSequence.h"
+#include "geom/GeoGeometry.h"
+#include "geom/GeoLineSegment.h"
+#include "geom/GeoReferenceSystem.h"
 
+#include <cstddef>
 #include <memory>
 
 namespace ep {
 namespace geom {
 
-class GeoLineString : public GeoGeometry {
+class GeoLineString : public GeoGeometry
+{
   friend class GeoFactory;
 
 public:
@@ -25,13 +29,16 @@ public:
 
   std::string getGeometryType() const override;
 
-  GeoCoordinate *getCoordinateN(std::size_t index);
+  std::size_t getNumCoordinate() const;
 
-  const GeoCoordinate *getCoordinateN(std::size_t index) const;
+  GeoCoordinate       *getCoordinate(std::size_t index);
+  const GeoCoordinate *getCoordinate(std::size_t index) const;
 
-  GeoCoordinateSequence *getCoordinates();
-
+  GeoCoordinateSequence       *getCoordinates();
   const GeoCoordinateSequence *getCoordinates() const;
+
+  std::unique_ptr<GeoPoint>       getPoint(std::size_t index) const;
+  std::unique_ptr<GeoLineSegment> getLineSegment(std::size_t index) const;
 
   virtual bool isClosed() const;
 
@@ -42,10 +49,11 @@ public:
 #endif
 
 protected:
-  GeoLineString(GeoCoordinateSequence::Ptr &&pts);
+  GeoLineString(
+      std::unique_ptr<GeoCoordinateSequence> &&pts, GeoReferenceSystem ref);
 
 protected:
-  GeoCoordinateSequence::Ptr pts_;
+  std::unique_ptr<GeoCoordinateSequence> pts_;
 };
 
 } // namespace geom

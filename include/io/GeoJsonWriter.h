@@ -2,10 +2,10 @@
 #define ELLIPSOID_IO_GEOJSONWRITER_H_
 
 #include <geom/GeoGeometry.h>
-#include <vend/json.hpp>
-
 #include <memory>
 #include <string>
+#include <vend/json.hpp>
+
 
 namespace ep {
 namespace geom {
@@ -24,10 +24,11 @@ class GeoMultiPolygon;
 namespace ep {
 namespace io {
 
-class GeoJsonWriter {
+class GeoJsonWriter
+{
 public:
   static std::unique_ptr<GeoJsonWriter> getWriter();
-      
+
   GeoJsonWriter() = default;
 
   ~GeoJsonWriter() = default;
@@ -59,15 +60,15 @@ private:
 
   nlohmann::json writePolygonAsJson(const geom::GeoPolygon *p);
 
-  nlohmann::json
-  writeMultiLineStringAsJson(const geom::GeoMultiLineString *mls);
+  nlohmann::json writeMultiLineStringAsJson(
+      const geom::GeoMultiLineString *mls);
 
   nlohmann::json writeMultiPolygonAsJson(const geom::GeoMultiPolygon *mp);
 
   nlohmann::json writeCoordinateAsJson(const geom::GeoCoordinate *c);
 
-  nlohmann::json
-  writeCoordinateSequenceAsJson(const geom::GeoCoordinateSequence *cseq);
+  nlohmann::json writeCoordinateSequenceAsJson(
+      const geom::GeoCoordinateSequence *cseq);
 };
 
 } // namespace io

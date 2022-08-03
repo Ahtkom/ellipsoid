@@ -1,71 +1,109 @@
-#include <geom/GeoCoordinate.h>
-#include <geom/GeoCoordinateSequence.h>
-#include <geom/GeoLineSegment.h>
-#include <geom/GeoLineString.h>
-#include <geom/GeoLinearRing.h>
-#include <geom/GeoMultiLineString.h>
-#include <geom/GeoMultiPolygon.h>
-#include <geom/GeoPoint.h>
-#include <geom/GeoPolygon.h>
-#include <io/ParseException.h>
-#include <io/WKTReader.h>
+#include "io/WKTReader.h"
+
+#include "geom/GeoCoordinate.h"
+#include "geom/GeoCoordinateSequence.h"
+#include "geom/GeoFactory.h"
+#include "geom/GeoLineSegment.h"
+#include "geom/GeoLineString.h"
+#include "geom/GeoLinearRing.h"
+#include "geom/GeoMultiLineString.h"
+#include "geom/GeoMultiPolygon.h"
+#include "geom/GeoPoint.h"
+#include "geom/GeoPolygon.h"
+#include "io/ParseException.h"
+
+#include <cstddef>
+#include <iostream>
+#include <string_view>
 
 namespace ep {
 namespace io {
 
-geom::GeoGeometry::Ptr WKTReader::read(const std::string &wkt) {
+WKTReader::WKTReader(geom::GeoReferenceSystem ref)
+    : refsys_(ref) { }
+
+geom::GeoGeometry::Ptr
+WKTReader::read(std::string_view wkt) {
   std::size_t n = wkt.size();
   if (n >= 10) {
     if (wkt.substr(0, 5) == "POINT") {
-      return readPoint(wkt.substr(6));
+      return wkt.at(5) == ' ' ? readPoint(wkt.substr(7))
+                              : readPoint(wkt.substr(6));
     } else if (wkt.substr(0, 11) == "LINESEGMENT") {
-      return readLineSegment(wkt.substr(12, n - 13));
+      return wkt.at(11) == ' ' ? readLineSegment(wkt.substr(13, n - 14))
+                               : readLineSegment(wkt.substr(12, n - 13));
     } else if (wkt.substr(0, 10) == "LINESTRING") {
-      return readLineString(wkt.substr(11, n - 12));
+      return wkt.at(10) == ' ' ? readLineString(wkt.substr(12, n - 14))
+                               : readLineString(wkt.substr(11, n - 12));
     } else if (wkt.substr(0, 10) == "LINEARRING") {
-      return readLinearRing(wkt.substr(11, n - 12));
+      return wkt.at(10) == ' ' ? readLinearRing(wkt.substr(12, n - 14))
+                               : readLinearRing(wkt.substr(11, n - 12));
     } else if (wkt.substr(0, 7) == "POLYGON") {
-      return readPolygon(wkt.substr(8, n - 9));
+      return wkt.at(7) == ' ' ? readPolygon(wkt.substr(9, n - 10))
+                              : readPolygon(wkt.substr(8, n - 9));
     } else if (wkt.substr(0, 15) == "MULTILINESTRING") {
-      return readMultiLineString(wkt.substr(16, n - 17));
+      return wkt.at(15) == ' ' ? readMultiLineString(wkt.substr(17, n - 18))
+                               : readMultiLineString(wkt.substr(16, n - 17));
     } else if (wkt.substr(0, 12) == "MULTIPOLYGON") {
-      return readMultiPolygon(wkt.substr(13, n - 14));
+      return wkt.at(12) == ' ' ? readMultiPolygon(wkt.substr(14, n - 15))
+                               : readMultiPolygon(wkt.substr(13, n - 14));
     }
   }
   throw ParseException(__PRETTY_FUNCTION__, "Invalid WKT form!");
 }
 
-geom::GeoPoint::Ptr WKTReader::readPoint(const std::string &wkt) {
-  return gf.createPoint(readCoordinate(wkt));
+geom::GeoReferenceSystem
+WKTReader::getGeoReference() const {
+  return refsys_;
 }
 
-geom::GeoLineSegment::Ptr WKTReader::readLineSegment(const std::string &wkt) {
-  return gf.createLineSegment(readCoordinateSequence(wkt));
+void
+WKTReader::setGeoReference(geom::GeoReferenceSystem ref) {
+  refsys_ = ref;
 }
 
-geom::GeoLineString::Ptr WKTReader::readLineString(const std::string &wkt) {
-  return gf.createLineString(readCoordinateSequence(wkt));
+geom::GeoPoint::Ptr
+WKTReader::readPoint(std::string_view wkt) {
+  return geom::GeoFactory::createPoint(readCoordinate(wkt), getGeoReference());
 }
 
-geom::GeoLinearRing::Ptr WKTReader::readLinearRing(const std::string &wkt) {
-  return gf.createLinearRing(readCoordinateSequence(wkt));
+geom::GeoLineSegment::Ptr
+WKTReader::readLineSegment(std::string_view wkt) {
+  // return geom::GeoFactory::createLineSegment(readCoordinateSequence(wkt));
 }
 
-geom::GeoPolygon::Ptr WKTReader::readPolygon(const std::string &wkt) {
+geom::GeoLineString::Ptr
+WKTReader::readLineString(std::string_view wkt) {
+  return geom::GeoFactory::createLineString(
+      readCoordinateSequence(wkt), getGeoReference());
+}
+
+geom::GeoLinearRing::Ptr
+WKTReader::readLinearRing(std::string_view wkt) {
+  return geom::GeoFactory::createLinearRing(
+      readCoordinateSequence(wkt), getGeoReference());
+}
+
+geom::GeoPolygon::Ptr
+WKTReader::readPolygon(std::string_view wkt) {
   std::vector<geom::GeoLinearRing::Ptr> rings;
-  int i = 1, len = wkt.size();
-  while (int n = findNextToken(wkt.substr(i), ')') + 1) {
-    rings.push_back(readLinearRing(wkt.substr(i, n - 1)));
-    if ((i += n + 2) >= len) {
+
+  int i = 1, len = wkt.size(), n;
+  do {
+    n = findNextToken(wkt.substr(i), ')');
+    if (n == -1) {
       break;
     }
-  }
-  return gf.createPolygon(std::move(rings));
+    rings.push_back(readLinearRing(wkt.substr(i, n)));
+    i += n + 3;
+  } while (i <= len);
+  return geom::GeoFactory::createPolygon(std::move(rings), getGeoReference());
 }
 
 geom::GeoMultiLineString::Ptr
-WKTReader::readMultiLineString(const std::string &wkt) {
+WKTReader::readMultiLineString(std::string_view wkt) {
   std::vector<geom::GeoLineString::Ptr> lines;
+
   int i = 1, len = wkt.size();
   while (int n = findNextToken(wkt.substr(i), ')') + 1) {
     lines.push_back(readLineString(wkt.substr(i, n - 1)));
@@ -73,11 +111,14 @@ WKTReader::readMultiLineString(const std::string &wkt) {
       break;
     }
   }
-  return gf.createMultiLineString(std::move(lines));
+  return geom::GeoFactory::createMultiLineString(
+      std::move(lines), getGeoReference());
 }
 
-geom::GeoMultiPolygon::Ptr WKTReader::readMultiPolygon(const std::string &wkt) {
+geom::GeoMultiPolygon::Ptr
+WKTReader::readMultiPolygon(std::string_view wkt) {
   std::vector<geom::GeoPolygon::Ptr> ps;
+
   int i = 1, len = wkt.size();
   while (int n = findNextToken(wkt.substr(i), "))") + 1) {
     ps.push_back(readPolygon(wkt.substr(i, n)));
@@ -85,35 +126,41 @@ geom::GeoMultiPolygon::Ptr WKTReader::readMultiPolygon(const std::string &wkt) {
       break;
     }
   }
-  return gf.createMultiPolygon(std::move(ps));
+  return geom::GeoFactory::createMultiPolygon(std::move(ps), getGeoReference());
 }
 
-geom::GeoCoordinate WKTReader::readCoordinate(const std::string &wkt) {
-  int i = findNextToken(wkt, ' ');
-  if (i != -1) {
-    return gf.createCoordinate(std::stod(wkt.substr(0, i)),
-                                  std::stod(wkt.substr(i + 1)));
-  }
-  throw ParseException(__PRETTY_FUNCTION__, "Invalid WKT form!");
+geom::GeoCoordinate
+WKTReader::readCoordinate(std::string_view wkt) {
+  double lon, lat;
+  std::sscanf(wkt.data(), "%lf %lf", &lon, &lat);
+  return geom::GeoFactory::createCoordinate(lon, lat, getGeoReference());
 }
 
 geom::GeoCoordinateSequence::Ptr
-WKTReader::readCoordinateSequence(const std::string &wkt) {
-  std::vector<geom::GeoCoordinate> coords;
-  int i = 0;
-  while (int n = findNextToken(wkt.substr(i), ',') + 1) {
-    coords.push_back(readCoordinate(wkt.substr(i, n - 1)));
-    i += n;
+WKTReader::readCoordinateSequence(std::string_view wkt) {
+  std::vector<size_t> pos = {0};
+  for (std::size_t i = 0; i != wkt.size(); ++i) {
+    if (wkt.at(i) == ',') {
+      pos.push_back(i + 1);
+    }
   }
-  coords.push_back(readCoordinate(wkt.substr(i)));
-  return gf.createCoordinateSequence(std::move(coords));
+  pos.push_back(wkt.size());
+
+  std::vector<geom::GeoCoordinate> coords(pos.size() - 1);
+  for (std::size_t i = 0; i != pos.size() - 1; ++i) {
+    coords[i] = readCoordinate(wkt.substr(pos[i], pos[i + 1] - pos[i] - 1));
+  }
+  return geom::GeoFactory::createCoordinateSequence(
+      std::move(coords), getGeoReference());
 }
 
-int WKTReader::findNextToken(const std::string &str, char token) {
+int
+WKTReader::findNextToken(std::string_view str, char token) {
   return str.find_first_of(token);
 }
 
-int WKTReader::findNextToken(const std::string &str, const std::string &token) {
+int
+WKTReader::findNextToken(std::string_view str, std::string_view token) {
   std::size_t n = str.size(), m = token.size();
   if (n < m) {
     return -1;

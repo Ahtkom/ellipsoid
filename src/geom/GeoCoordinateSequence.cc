@@ -11,12 +11,12 @@ std::size_t GeoCoordinateSequence::getNumCoordinate() const {
   return coords_.size();
 }
 
-GeoCoordinate *GeoCoordinateSequence::getCoordinateN(std::size_t index) {
+GeoCoordinate *GeoCoordinateSequence::getCoordinate(std::size_t index) {
   return &coords_[index];
 }
 
 const GeoCoordinate *
-GeoCoordinateSequence::getCoordinateN(std::size_t index) const {
+GeoCoordinateSequence::getCoordinate(std::size_t index) const {
   return &coords_[index];
 }
 
@@ -32,9 +32,9 @@ std::ostream &operator<<(std::ostream &os,
     return os << "]";
   }
   for (std::size_t i = 0; i != n - 1; ++i) {
-    os << coords.getCoordinateN(i) << ", ";
+    os << coords.getCoordinate(i) << ", ";
   }
-  os << coords.getCoordinateN(n - 1) << "]";
+  os << coords.getCoordinate(n - 1) << "]";
   return os;
 }
 

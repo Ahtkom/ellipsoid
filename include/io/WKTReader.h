@@ -1,11 +1,13 @@
 #ifndef ELLIPSOID_IO_WKTREADER_H_
 #define ELLIPSOID_IO_WKTREADER_H_
 
-#include <geom/GeoFactory.h>
-#include <geom/GeoGeometry.h>
+#include "geom/GeoFactory.h"
+#include "geom/GeoGeometry.h"
+#include "geom/GeoReferenceSystem.h"
 
 #include <memory>
 #include <string>
+#include <string_view>
 #include <type_traits>
 
 namespace ep {
@@ -25,65 +27,64 @@ class GeoMultiPolygon;
 namespace ep {
 namespace io {
 
-class WKTReader {
+class WKTReader
+{
 public:
-  WKTReader() = default;
+  explicit WKTReader(
+      geom::GeoReferenceSystem ref = geom::GeoReferenceSystem::undefined);
 
-  ~WKTReader() = default;
+  std::unique_ptr<geom::GeoGeometry> read(std::string_view wkt);
 
-  geom::GeoGeometry::Ptr read(const std::string &wkt);
+  // For specific geometry types.
+  template <typename T>
+  std::unique_ptr<T> read(std::string_view geojson_str) {
+    static_assert(std::is_base_of_v<geom::GeoGeometry, T>);
 
-  /**
-   * @brief Parse a GeoJson string returning a geometry pointer with specific
-   *        type.
-   *
-   * @tparam T geometry types
-   */
-  template <typename T, typename = std::enable_if_t<
-                            std::is_base_of<geom::GeoGeometry, T>::value>>
-  std::unique_ptr<T> read(const std::string &geojson_str) {
     auto geometry = read(geojson_str);
-    auto g = dynamic_cast<const T *>(geometry.get());
+    auto g        = dynamic_cast<const T *>(geometry.get());
     if (!g) {
-      throw ParseException(__PRETTY_FUNCTION__,
-                           "Unsupported type for conversion!");
+      throw ParseException(
+          __PRETTY_FUNCTION__, "Unsupported type for conversion!");
     }
     return std::unique_ptr<T>(static_cast<T *>(geometry.release()));
   }
 
+  geom::GeoReferenceSystem getGeoReference() const;
+  void                     setGeoReference(geom::GeoReferenceSystem ref);
+
 private:
   // WKT form: x y
-  geom::GeoCoordinate readCoordinate(const std::string &wkt);
+  geom::GeoCoordinate readCoordinate(std::string_view wkt);
 
   // WKT form: x1 y1,...,xn yn
-  std::unique_ptr<geom::GeoCoordinateSequence>
-  readCoordinateSequence(const std::string &wkt);
+  std::unique_ptr<geom::GeoCoordinateSequence> readCoordinateSequence(
+      std::string_view wkt);
 
   // WKT form: x y
-  std::unique_ptr<geom::GeoPoint> readPoint(const std::string &wkt);
+  std::unique_ptr<geom::GeoPoint> readPoint(std::string_view wkt);
 
   // WKT form: x1 y1,x2 y2
-  std::unique_ptr<geom::GeoLineSegment> readLineSegment(const std::string &wkt);
+  std::unique_ptr<geom::GeoLineSegment> readLineSegment(std::string_view wkt);
 
   // WKT form: x1 y1,...,xn yn
-  std::unique_ptr<geom::GeoLineString> readLineString(const std::string &wkt);
+  std::unique_ptr<geom::GeoLineString> readLineString(std::string_view wkt);
 
   // WKT form: x1 y1,...,xn yn,x1 y1
-  std::unique_ptr<geom::GeoLinearRing> readLinearRing(const std::string &wkt);
+  std::unique_ptr<geom::GeoLinearRing> readLinearRing(std::string_view wkt);
 
   // WKT form:
   //  (x01 y01,...,x0n y0n,x01 y01),
   //  (x11 y11,...,x1n y1n,x11 y11),
   //  ...,
   //  (xm1 ym1,...,xmn ymn,xm1 ym1)
-  std::unique_ptr<geom::GeoPolygon> readPolygon(const std::string &wkt);
+  std::unique_ptr<geom::GeoPolygon> readPolygon(std::string_view wkt);
 
   // WKT form:
   //  (x11 y11,...,x1n y1n),
   //  ...,
   //  (xm1 ym1,...,xmn ymn)
-  std::unique_ptr<geom::GeoMultiLineString>
-  readMultiLineString(const std::string &wkt);
+  std::unique_ptr<geom::GeoMultiLineString> readMultiLineString(
+      std::string_view wkt);
 
   // WKT form:
   //  ((x011 y011,...,x0n1 y0n1,x011 y011)
@@ -93,18 +94,17 @@ private:
   //  ((x01k y01k,...,x0nk y0nk,x01k y01k)
   //   ...,
   //   (xm1k ym1k,...,xmnk ymnk,xm1k ym1k)))
-  std::unique_ptr<geom::GeoMultiPolygon>
-  readMultiPolygon(const std::string &wkt);
+  std::unique_ptr<geom::GeoMultiPolygon> readMultiPolygon(std::string_view wkt);
 
   // return the index of first occurrence in `str` that equals the given token,
   // -1 if not found
-  int findNextToken(const std::string &str, char token);
+  int findNextToken(std::string_view str, char token);
 
   // return the index of first occurrence of starting position, -1 if not found
-  int findNextToken(const std::string &str, const std::string &token);
+  int findNextToken(std::string_view str, std::string_view token);
 
 private:
-  geom::GeoFactory gf;
+  geom::GeoReferenceSystem refsys_;
 };
 
 } // namespace io

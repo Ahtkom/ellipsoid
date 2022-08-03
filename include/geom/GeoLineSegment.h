@@ -1,16 +1,18 @@
 #ifndef ELLIPSOID_GEOM_GEOLINESEGMENT_H_
 #define ELLIPSOID_GEOM_GEOLINESEGMENT_H_
 
-#include <geom/GeoCoordinate.h>
-#include <geom/GeoGeometry.h>
-#include <geom/GeoPoint.h>
+#include "geom/GeoCoordinate.h"
+#include "geom/GeoGeometry.h"
+#include "geom/GeoPoint.h"
+#include "geom/GeoReferenceSystem.h"
 
 #include <memory>
 
 namespace ep {
 namespace geom {
 
-class GeoLineSegment : public GeoGeometry {
+class GeoLineSegment : public GeoGeometry
+{
   friend class GeoFactory;
 
 public:
@@ -20,31 +22,27 @@ public:
 
   std::string getGeometryType() const override;
 
-  GeoPoint *getFromPoint();
+  GeoCoordinate       *getFromCoordinate();
+  const GeoCoordinate *getFromCoordinate() const;
 
-  const GeoPoint *getFromPoint() const;
+  GeoCoordinate       *getToCoordinate();
+  const GeoCoordinate *getToCoordinate() const;
 
-  GeoPoint *getToPoint();
-
-  const GeoPoint *getToPoint() const;
+  std::unique_ptr<GeoPoint> getFromPoint() const;
+  std::unique_ptr<GeoPoint> getToPoint() const;
 
 #ifdef EP_OPENGL
   void draw() const override;
 #endif
 
 protected:
-  GeoLineSegment(GeoPoint::Ptr &&from, GeoPoint::Ptr &&to);
+  GeoLineSegment(
+      GeoCoordinate &&from, GeoCoordinate &&to, GeoReferenceSystem ref);
 
 private:
-  GeoPoint::Ptr from_; // From point
+  GeoCoordinate from_; // From point
 
-  GeoPoint::Ptr to_; // To Point
-
-  // GeoCoordinate from_;
-  // GeoCoordinate to_;
-  // double from_ang_;
-  // double to_ang_;
-  // double length_;
+  GeoCoordinate to_; // To Point
 };
 
 } // namespace geom

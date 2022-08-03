@@ -1,8 +1,9 @@
 #ifndef ELLIPSOID_GEOM_GEOPOINT_H_
 #define ELLIPSOID_GEOM_GEOPOINT_H_
 
-#include <geom/GeoCoordinate.h>
-#include <geom/GeoGeometry.h>
+#include "geom/GeoCoordinate.h"
+#include "geom/GeoGeometry.h"
+#include "geom/GeoReferenceSystem.h"
 
 #include <memory>
 #include <string>
@@ -10,7 +11,8 @@
 namespace ep {
 namespace geom {
 
-class GeoPoint : public GeoGeometry {
+class GeoPoint : public GeoGeometry
+{
   friend class GeoFactory;
 
 public:
@@ -18,8 +20,7 @@ public:
 
   ~GeoPoint() override = default;
 
-  GeoCoordinate *getCoordinate();
-
+  GeoCoordinate       *getCoordinate();
   const GeoCoordinate *getCoordinate() const;
 
   std::string getGeometryType() const override;
@@ -29,7 +30,7 @@ public:
 #endif
 
 protected:
-  GeoPoint(GeoCoordinate &&coord);
+  GeoPoint(GeoCoordinate &&coord, GeoReferenceSystem ref);
 
 private:
   GeoCoordinate coord_;

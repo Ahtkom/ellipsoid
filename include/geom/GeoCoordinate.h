@@ -15,7 +15,6 @@ public:
   ~GeoCoordinate() = default;
 
   double getLon() const;
-
   double getLat() const;
 
   TO_STRING_METHOD_WITH_OSTREAM(GeoCoordinate)
@@ -26,7 +25,6 @@ public:
 
 private:
   double lon_;
-
   double lat_;
 };
 

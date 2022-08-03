@@ -1,23 +1,46 @@
-#include <geom/GeoLineSegment.h>
+#include "geom/GeoLineSegment.h"
+
+#include "geom/GeoCoordinate.h"
+#include "geom/GeoGeometry.h"
+#include "geom/GeoReferenceSystem.h"
 
 namespace ep {
 namespace geom {
 
-GeoLineSegment::GeoLineSegment(GeoPoint::Ptr &&from, GeoPoint::Ptr &&to)
-    : from_(std::move(from)), to_(std::move(to)) {}
+GeoLineSegment::GeoLineSegment(
+    GeoCoordinate &&from, GeoCoordinate &&to, GeoReferenceSystem ref)
+    : GeoGeometry(ref)
+    , from_(from)
+    , to_(to) { }
 
-std::string GeoLineSegment::getGeometryType() const { return "LINESEGMENT"; }
+std::string
+GeoLineSegment::getGeometryType() const {
+  return "LINESEGMENT";
+}
 
-GeoPoint *GeoLineSegment::getFromPoint() { return from_.get(); }
+GeoCoordinate *
+GeoLineSegment::getFromCoordinate() {
+  return &from_;
+}
 
-const GeoPoint *GeoLineSegment::getFromPoint() const { return from_.get(); }
+const GeoCoordinate *
+GeoLineSegment::getFromCoordinate() const {
+  return &from_;
+}
 
-GeoPoint *GeoLineSegment::getToPoint() { return to_.get(); }
+GeoCoordinate *
+GeoLineSegment::getToCoordinate() {
+  return &to_;
+}
 
-const GeoPoint *GeoLineSegment::getToPoint() const { return to_.get(); }
+const GeoCoordinate *
+GeoLineSegment::getToCoordinate() const {
+  return &to_;
+}
 
 #ifdef EP_OPENGL
-void GeoLineSegment::draw() const {
+void
+GeoLineSegment::draw() const {
   from_->draw();
   to_->draw();
 }

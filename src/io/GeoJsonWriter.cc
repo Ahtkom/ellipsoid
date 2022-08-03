@@ -111,7 +111,7 @@ nlohmann::json GeoJsonWriter::writePolygonAsJson(const geom::GeoPolygon *p) {
       writeLinearRingAsJson(p->getExteriorRing())["coordinates"];
   for (std::size_t i = 0; i != p->getNumInteriorRing(); ++i) {
     json["coordinates"][i + 1] =
-        writeLinearRingAsJson(p->getInteriorRingN(i))["coordinates"];
+        writeLinearRingAsJson(p->getInteriorRing(i))["coordinates"];
   }
   return json;
 }
@@ -122,7 +122,7 @@ GeoJsonWriter::writeMultiLineStringAsJson(const geom::GeoMultiLineString *mls) {
   json["type"] = "MultiLineString";
   for (std::size_t i = 0; i != mls->getNumLineString(); ++i) {
     json["coordinates"][i] =
-        writeLineStringAsJson(mls->getLineStringN(i))["coordinates"];
+        writeLineStringAsJson(mls->getLineString(i))["coordinates"];
   }
   return json;
 }
@@ -133,7 +133,7 @@ GeoJsonWriter::writeMultiPolygonAsJson(const geom::GeoMultiPolygon *mp) {
   json["type"] = "MultiPolygon";
   for (std::size_t i = 0; i != mp->getNumPolygon(); ++i) {
     json["coordinates"][i] =
-        writePolygonAsJson(mp->getPolygonN(i))["coordinates"];
+        writePolygonAsJson(mp->getPolygon(i))["coordinates"];
   }
   return json;
 }
